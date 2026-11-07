@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wedding of Tandi & Jeni</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Great+Vibes&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Link ke File CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ==========================================
+       HALAMAN SAMPUL (HERO COVER)
+       ========================================== -->
+    <div class="hero">
+        <div class="hero-content">
+            <p class="sub-title">THE WEDDING OF</p>
+            
+            <!-- Nama Bertingkat yang Elegan -->
+            <div class="cover-nama-bertingkat">
+                <span class="cover-nama-kiri">Tandi</span>
+                <span class="cover-simbol-dan">&</span>
+                <span class="cover-nama-kanan">Jeni</span>
+            </div>
+
+            <p class="yth">Kepada Yth. Bapak/Ibu/Saudara/i:</p>
+            <div id="nama-tamu">Tamu Undangan</div>
+            <button class="btn-buka" onclick="bukaUndangan()">
+                <i class="fa-solid fa-envelope-open"></i> Buka Undangan
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+       KOTAK UTAMA WEBSITE UNDANGAN
+       ========================================== -->
+    <div id="konten">
+
+        <!-- 1. SECTION HERO & FOTO UTAMA (ID: home) -->
+        <section class="hero-pasangan" id="home">
+            <!-- Hiasan Bunga Atas -->
+            <div class="bunga-atas-container">
+                <img src="bunga-atas.png" alt="Bunga Atas" class="bunga-atas">
+            </div>
+
+            <!-- Judul & Nama Bertingkat -->
+            <div class="overlay-text reveal-text">
+                <p class="sub-wedding">THE WEDDING OF</p>
+                <div class="nama-bertingkat">
+                    <span class="nama-kiri">Tandi</span>
+                    <span class="simbol-dan">&</span>
+                    <span class="nama-kanan">Jeni</span>
+                </div>
+            </div>
+
+            <!-- Bingkai Foto Utama / Slideshow -->
+            <div class="frame-foto-utama reveal-text delay-1">
+                <img src="pasangan.jpeg" alt="Foto 1" class="foto-slider active">
+                <img src="1.jpeg" alt="Foto 2" class="foto-slider">
+                <img src="2.jpeg" alt="Foto 3" class="foto-slider">
+                <img src="3.jpeg" alt="Foto 4" class="foto-slider">
+                <img src="4.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="5.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="6.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="7.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="8.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="9.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="10.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="11.jpeg" alt="Foto 5" class="foto-slider">
+                <img src="12.jpeg" alt="Foto 5" class="foto-slider">
+            </div>
+
+            <!-- Hiasan Bunga Bawah -->
+            <div class="bunga-footer-container">
+                <img src="bunga-bawah.png" alt="Bunga Bawah" class="bunga-bawah">
+            </div>
+        </section>
+
+        <!-- 2. SECTION COUNTDOWN TIMER -->
+        <section class="countdown-section reveal-text">
+            <div class="countdown-container">
+                <div class="countdown-box">
+                    <span id="days">0</span>
+                    <p>DAY</p>
+                </div>
+                <div class="countdown-box">
+                    <span id="hours">0</span>
+                    <p>HOUR</p>
+                </div>
+                <div class="countdown-box">
+                    <span id="minutes">0</span>
+                    <p>MINUTE</p>
+                </div>
+                <div class="countdown-box">
+                    <span id="seconds">0</span>
+                    <p>SECOND</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SECTION SALAM PEMBUKA -->
+        <section class="salam reveal-text">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <p class="ayat">"Demikianlah mereka bukan lagi dua, melainkan satu. Karena itu, apa yang telah dipersatukan Allah, tidak boleh diceraikan manusia."</p>
+            <p class="surah">(Matius 19:6)</p>
+            <hr class="divider">
+            <p class="salam-teks">Atas Kasih dan Karunia Tuhan Yesus Kristus, kami bermaksud menyelenggarakan Pemberkatan Pernikahan putra-putri kami:</p>
+        </section>
+
+        <!-- 4. SECTION PROFIL MEMPELAI (ID: mempelai) -->
+        <!-- 4. SECTION PROFIL MEMPELAI (ID: mempelai) -->
+<section class="mempelai-container mempelai-section reveal-text" id="mempelai">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <h2 class="section-title">MEMPELAI</h2>
+            
+            <div class="mempelai-layout-baru">
+                <!-- Mempelai Pria -->
+                <div class="mempelai-row reveal-text">
+                    <img src="pria.jpeg" alt="Tandi" class="foto-mempelai-bulat">
+                    <h3 class="nama-panggilan">Tandi Puang, S.T</h3>
+                    <p class="orangtua">Putra dari Pasangan Bpk. Bamba & Ibu Sarah<br>(Ambe' Limbong Karaeng & Indo' Limbong Karaeng)</p>
+                    <a href="https://instagram.com" target="_blank" class="btn-ig"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                </div>
+
+                <div class="simbol-dan-tengah">&</div>
+
+                <!-- Mempelai Wanita -->
+                <div class="mempelai-row reveal-text">
+                    <img src="wanita.jpeg" alt="Jeni" class="foto-mempelai-bulat">
+                    <h3 class="nama-panggilan">Jeniati, S.Pd, Gr.</h3>
+                    <p class="orangtua">Putri dari Pasangan Bpk. Alm. Benyamin & Ibu Lena<br>(Alm. Papa Minggu & Mama Minggu)</p>
+                    <a href="https://www.instagram.com/jenhy_tangkelangi?rpxt=d2gzN3ZtZmthcGk1" target="_blank" class="btn-ig"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SECTION RANGKAIAN ACARA (ID: acara) -->
+        <section class="acara-section reveal-text" id="acara">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <h2 class="section-title">RANGKAIAN ACARA</h2>
+            
+            <div class="acara-grid">
+                <div class="card-acara">
+                    <h3>IBADAH PERSIAPAN</h3>
+                    <p><i class="fa-solid fa-calendar-days"></i> Kamis, 31 Desember 2026</p>
+                    <p><i class="fa-solid fa-clock"></i> Pukul 16.00 WITA - Selesai</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Rumah Kediaman Mempelai Perempuan, Ka'da Male'deng Desa Orobua Kec. Sesenapadang</p>
+                </div>
+
+                <div class="card-acara">
+                    <h3>PEMBERKATAN PERKAWINAN</h3>
+                    <p><i class="fa-solid fa-calendar-days"></i> Kamis, 31 Desember 2026</p>
+                    <p><i class="fa-solid fa-clock"></i> Pukul 08.00 WITA - Selesai</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Gedung Gereja Jemaat Bahtera Pongka</p>
+                </div>
+
+                <div class="card-acara">
+                    <h3>RESEPSI PERNIKAHAN</h3>
+                    <p><i class="fa-solid fa-calendar-days"></i> Kamis, 31 Desember 2026</p>
+                    <p><i class="fa-solid fa-clock"></i> Pukul 12.00 WITA - Selesai</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Rumah Kediaman Mempelai Perempuan, Ka'da Male'deng Desa Orobua Kec. Sesenapadang</p>
+                </div>
+            </div>
+
+            <!-- ID: maps -->
+            <div class="maps-box" id="maps">
+                <h3>PETA LOKASI</h3>
+                <div class="map-embed-container">
+                    <iframe src="https://www.google.com/maps/embed?pb=..." width="100%" height="200" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+                <br>
+                <a href="https://maps.google.com" target="_blank" class="btn-maps"><i class="fa-solid fa-map-location-dot"></i> Buka Google Maps</a>
+            </div>
+        </section>
+
+        <!-- 6. SECTION GALERI FOTO (ID: galeri) -->
+        <section class="galeri-section reveal-text" id="galeri">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <h2 class="section-title">MOMENT BAHAGIA</h2>
+            <p class="sub-galeri">Perjalanan kasih kami dalam balutan kebersamaan</p>
+            
+            <div class="galeri-grid">
+                <div class="galeri-item"><img src="pasangan.jpeg" alt="Galeri 1"></div>
+                <div class="galeri-item"><img src="1.jpeg" alt="Galeri 2"></div>
+                <div class="galeri-item"><img src="2.jpeg" alt="Galeri 3"></div>
+                <div class="galeri-item"><img src="3.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="4.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="5.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="6.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="7.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="8.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="9.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="10.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="11.jpeg" alt="Galeri 4"></div>
+                <div class="galeri-item"><img src="12.jpeg" alt="Galeri 4"></div>
+            </div>
+        </section>
+
+        <!-- 7. SECTION RSVP & UCAPAN (ID: rsvp) -->
+        <section class="rsvp-section reveal-text" id="rsvp">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <h2 class="section-title">RSVP & UCAPAN</h2>
+            <p class="sub-rsvp">Konfirmasi kehadiran serta berikan doa restu Anda</p>
+            
+            <form id="rsvp-form" onsubmit="kirimUcapan(event)">
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap</label>
+                    <input type="text" id="nama" required placeholder="Masukkan nama Anda">
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">Konfirmasi Kehadiran</label>
+                    <select id="status" required>
+                        <option value="Hadir">Hadir</option>
+                        <option value="Tidak Hadir">Tidak Hadir</option>
+                        <option value="Ragu-ragu">Ragu-ragu</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pesan">Ucapan & Doa</label>
+                    <textarea id="pesan" rows="4" required placeholder="Tuliskan ucapan atau doa restu..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-kirim">Kirim Ucapan</button>
+            </form>
+
+            <div class="statistik-rsvp">
+                <div class="stat-box box-ucapan">
+                    <span id="jumlah-ucapan">0</span>
+                    <p>Ucapan</p>
+                </div>
+                <div class="stat-box box-hadir">
+                    <span id="stat-hadir">0</span>
+                    <p>Hadir</p>
+                </div>
+                <div class="stat-box box-tidak">
+                    <span id="stat-tidak">0</span>
+                    <p>Tidak Hadir</p>
+                </div>
+                <div class="stat-box box-ragu">
+                    <span id="stat-ragu">0</span>
+                    <p>Ragu</p>
+                </div>
+            </div>
+
+            <div class="daftar-ucapan-container">
+                <h3>Ucapan Tamu Undangan</h3>
+                <div id="daftar-ucapan" class="daftar-ucapan-box">
+                    <p style="text-align: center; color: #777; font-size: 0.8rem; padding: 20px;">Belum ada ucapan. Jadilah yang pertama memberikan doa!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. SECTION PENUTUP -->
+        <section class="penutup reveal-text">
+            <div class="divider-bunga">
+                <img src="bunga-pembatas.png" alt="Divider">
+            </div>
+            <p class="salam-teks">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu kepada kami.</p>
+            <p class="hormat">Tuhan Yesus Memberkati,</p>
+            
+            <!-- Nama Bertingkat Penutup -->
+            <div class="nama-penutup-bertingkat">
+                <span class="nama-kiri">Tandi</span>
+                <span class="simbol-dan">&</span>
+                <span class="nama-kanan">Jeni</span>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ==========================================
+       BOTTOM NAVIGATION BAR (TERHUBUNG KE SETIAP ID)
+       ========================================== -->
+    <div class="bottom-nav">
+        <a href="#home" class="nav-item" title="Home"><i class="fa-solid fa-house"></i></a>
+        <a href="#mempelai" class="nav-item" title="Mempelai"><i class="fa-solid fa-user-group"></i></a>
+        <a href="#acara" class="nav-item" title="Acara"><i class="fa-solid fa-calendar-days"></i></a>
+        <a href="#galeri" class="nav-item" title="Galeri"><i class="fa-solid fa-images"></i></a>
+        <a href="#maps" class="nav-item" title="Maps"><i class="fa-solid fa-map-location-dot"></i></a>
+        <button class="nav-item" onclick="toggleAutoScroll()" title="Auto Scroll"><i class="fa-solid fa-arrow-down" id="scroll-icon"></i></button>
+        <button class="nav-item" onclick="toggleMusic()" title="Music"><i class="fa-solid fa-music" id="music-icon"></i></button>
+    </div>
+
+    <!-- Link ke File JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+<meta name="color-scheme" content="light only">
