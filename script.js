@@ -229,49 +229,90 @@ function playMusic() {
     });
 }
 
-// 9. Fungsi Tombol Auto-Scroll
+// 9. Fungsi Tombol Auto-Scroll (Ultra Smooth dengan requestAnimationFrame)
 let isAutoScrolling = false;
-let scrollInterval;
+let scrollAnimFrame = null;
+let lastTimestamp = null;
+const SCROLL_SPEED = 50; // Kecepatan scroll (pixel per detik - sangat halus dan pas untuk membaca)
+let subPixelY = 0;
+
+function autoScrollStep(timestamp) {
+    if (!isAutoScrolling) return;
+
+    if (!lastTimestamp) {
+        lastTimestamp = timestamp;
+    }
+    const deltaTime = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    // Hindari lonjakan jika tab diminimize / berpindah
+    if (deltaTime > 0 && deltaTime < 0.1) {
+        subPixelY += SCROLL_SPEED * deltaTime;
+        if (subPixelY >= 1) {
+            const movePixels = Math.floor(subPixelY);
+            window.scrollBy(0, movePixels);
+            subPixelY -= movePixels;
+        }
+    }
+
+    // Deteksi batas bawah halaman
+    const maxScroll = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+    ) - window.innerHeight;
+
+    if (window.scrollY >= maxScroll - 3) {
+        stopAutoScroll();
+        return;
+    }
+
+    scrollAnimFrame = requestAnimationFrame(autoScrollStep);
+}
 
 function toggleAutoScroll() {
     let scrollIcon = document.getElementById('scroll-icon');
     
     if (!isAutoScrolling) {
         isAutoScrolling = true;
+        lastTimestamp = null;
+        subPixelY = 0;
+
         if (scrollIcon) {
             scrollIcon.classList.remove('fa-arrow-down');
             scrollIcon.classList.add('fa-pause');
         }
         
-        scrollInterval = setInterval(() => {
-            window.scrollBy({ top: 3, behavior: 'smooth' });
-
-            const revealElements = document.querySelectorAll('.reveal-text');
-            revealElements.forEach(el => {
-                const rect = el.getBoundingClientRect();
-                if (rect.top <= window.innerHeight * 0.95) {
-                    el.classList.add('active');
-                }
-            });
-
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
-                stopAutoScroll();
-            }
-        }, 20);
+        scrollAnimFrame = requestAnimationFrame(autoScrollStep);
     } else {
         stopAutoScroll();
     }
 }
 
 function stopAutoScroll() {
+    if (!isAutoScrolling && !scrollAnimFrame) return;
     isAutoScrolling = false;
-    clearInterval(scrollInterval);
+    
+    if (scrollAnimFrame) {
+        cancelAnimationFrame(scrollAnimFrame);
+        scrollAnimFrame = null;
+    }
+    
+    lastTimestamp = null;
     let scrollIcon = document.getElementById('scroll-icon');
     if (scrollIcon) {
         scrollIcon.classList.remove('fa-pause');
         scrollIcon.classList.add('fa-arrow-down');
     }
 }
+
+// Berhenti otomatis jika pengguna menyentuh layar / scroll mouse secara manual
+window.addEventListener('wheel', () => {
+    if (isAutoScrolling) stopAutoScroll();
+}, { passive: true });
+
+window.addEventListener('touchstart', () => {
+    if (isAutoScrolling) stopAutoScroll();
+}, { passive: true });
 
 // ==========================================================================
 // 10. FUNGSI DATABASE RSVP & BUKU TAMU UCAPAN
