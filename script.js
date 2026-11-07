@@ -167,6 +167,11 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }, { passive: true });
     }
+
+    // Inisialisasi Realtime Database Ucapan & RSVP
+    if (typeof UcapanDB !== 'undefined') {
+        UcapanDB.onUcapanChange(renderDaftarUcapan);
+    }
 });
 
 // 7. Fungsi untuk Membuka Undangan (Fade Out Lembut)
@@ -268,41 +273,164 @@ function stopAutoScroll() {
     }
 }
 
-// 10. Fungsi Kirim RSVP & Buku Tamu
-function kirimUcapan(event) {
-    event.preventDefault();
-    
-    const namaInput = document.getElementById('nama').value;
-    const statusInput = document.getElementById('status').value;
-    const pesanInput = document.getElementById('pesan').value;
-    
+// ==========================================================================
+// 10. FUNGSI DATABASE RSVP & BUKU TAMU UCAPAN
+// ==========================================================================
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function formatWaktu(timestamp) {
+    if (!timestamp) return 'Baru saja';
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Baru saja';
+
+    const sekarang = Date.now();
+    const selisihDetik = Math.floor((sekarang - date.getTime()) / 1000);
+
+    if (selisihDetik < 60) return 'Baru saja';
+    if (selisihDetik < 3600) return `${Math.floor(selisihDetik / 60)} menit yang lalu`;
+    if (selisihDetik < 86400) return `${Math.floor(selisihDetik / 3600)} jam yang lalu`;
+
+    const opsi = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return date.toLocaleDateString('id-ID', opsi);
+}
+
+function renderDaftarUcapan(data) {
     const daftarUcapanBox = document.getElementById('daftar-ucapan');
-    
-    if (daftarUcapanBox.querySelector('p') && daftarUcapanBox.querySelector('p').innerText.includes('Belum ada ucapan')) {
-        daftarUcapanBox.innerHTML = '';
+    if (!daftarUcapanBox) return;
+
+    const list = Array.isArray(data) ? data : [];
+
+    // Hitung statistik
+    let countHadir = 0;
+    let countTidak = 0;
+    let countRagu = 0;
+
+    list.forEach(item => {
+        if (item.status === 'Hadir') countHadir++;
+        else if (item.status === 'Tidak Hadir') countTidak++;
+        else if (item.status === 'Ragu-ragu') countRagu++;
+    });
+
+    const elTotal = document.getElementById('jumlah-ucapan');
+    const elHadir = document.getElementById('stat-hadir');
+    const elTidak = document.getElementById('stat-tidak');
+    const elRagu = document.getElementById('stat-ragu');
+
+    if (elTotal) elTotal.innerText = list.length;
+    if (elHadir) elHadir.innerText = countHadir;
+    if (elTidak) elTidak.innerText = countTidak;
+    if (elRagu) elRagu.innerText = countRagu;
+
+    // Render list
+    if (list.length === 0) {
+        daftarUcapanBox.innerHTML = `
+            <div style="text-align: center; color: #888; font-size: 0.82rem; padding: 25px 10px;">
+                <i class="fa-regular fa-comment-dots" style="font-size: 1.5rem; color: #c2d6cb; margin-bottom: 8px; display: block;"></i>
+                Belum ada ucapan. Jadilah yang pertama memberikan doa restu!
+            </div>
+        `;
+        return;
     }
-    
-    const itemBaru = document.createElement('div');
-    itemBaru.style.cssText = "padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 8px; text-align: left;";
-    itemBaru.innerHTML = `<strong>${namaInput}</strong> <span style="font-size: 0.75rem; color: #2e7d32; font-weight: bold;">(${statusInput})</span><p style="font-size: 0.8rem; color: #555; margin-top: 4px;">${pesanInput}</p>`;
-    
-    daftarUcapanBox.prepend(itemBaru);
-    
-    const jumlahUcapanEl = document.getElementById('jumlah-ucapan');
-    let currentTotal = parseInt(jumlahUcapanEl.innerText) || 0;
-    jumlahUcapanEl.innerText = currentTotal + 1;
-    
-    if (statusInput === 'Hadir') {
-        let statHadir = document.getElementById('stat-hadir');
-        statHadir.innerText = parseInt(statHadir.innerText) + 1;
-    } else if (statusInput === 'Tidak Hadir') {
-        let statTidak = document.getElementById('stat-tidak');
-        statTidak.innerText = parseInt(statTidak.innerText) + 1;
-    } else if (statusInput === 'Ragu-ragu') {
-        let statRagu = document.getElementById('stat-ragu');
-        statRagu.innerText = parseInt(statRagu.innerText) + 1;
+
+    daftarUcapanBox.innerHTML = list.map(item => {
+        const initial = (item.nama || 'T').trim().charAt(0).toUpperCase();
+        let badgeClass = 'hadir';
+        let badgeIcon = 'fa-check';
+
+        if (item.status === 'Tidak Hadir') {
+            badgeClass = 'tidak-hadir';
+            badgeIcon = 'fa-xmark';
+        } else if (item.status === 'Ragu-ragu') {
+            badgeClass = 'ragu-ragu';
+            badgeIcon = 'fa-question';
+        }
+
+        const waktuStr = item.tanggal || formatWaktu(item.timestamp);
+
+        return `
+            <div class="ucapan-item">
+                <div class="ucapan-header">
+                    <div class="ucapan-user">
+                        <div class="ucapan-avatar">${initial}</div>
+                        <span class="ucapan-nama">${escapeHtml(item.nama)}</span>
+                    </div>
+                    <span class="ucapan-badge ${badgeClass}">
+                        <i class="fa-solid ${badgeIcon}"></i> ${escapeHtml(item.status || 'Hadir')}
+                    </span>
+                </div>
+                <div class="ucapan-pesan">${escapeHtml(item.pesan)}</div>
+                <div class="ucapan-waktu">
+                    <i class="fa-regular fa-clock"></i> ${escapeHtml(waktuStr)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function kirimUcapan(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('rsvp-form');
+    const btnKirim = form ? form.querySelector('button[type="submit"]') : null;
+    const namaInput = document.getElementById('nama');
+    const statusInput = document.getElementById('status');
+    const pesanInput = document.getElementById('pesan');
+
+    const nama = namaInput ? namaInput.value.trim() : '';
+    const status = statusInput ? statusInput.value : 'Hadir';
+    const pesan = pesanInput ? pesanInput.value.trim() : '';
+
+    if (!nama || !pesan) {
+        alert('Mohon lengkapi nama dan ucapan Anda.');
+        return;
     }
-    
-    document.getElementById('rsvp-form').reset();
-    alert('Konfirmasi kehadiran dan ucapan berhasil dikirim. Terima kasih!');
+
+    // Ubah status tombol jadi memproses
+    let originalBtnText = 'Kirim Ucapan';
+    if (btnKirim) {
+        originalBtnText = btnKirim.innerHTML;
+        btnKirim.disabled = true;
+        btnKirim.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+    }
+
+    try {
+        const payload = {
+            nama: nama,
+            status: status,
+            pesan: pesan,
+            tanggal: new Date().toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+
+        if (typeof UcapanDB !== 'undefined') {
+            await UcapanDB.simpan(payload);
+        } else {
+            console.warn("UcapanDB tidak ditemukan!");
+        }
+
+        form.reset();
+        alert('Konfirmasi kehadiran dan ucapan berhasil dikirim. Terima kasih banyak atas doa restu Anda!');
+    } catch (error) {
+        console.error('Error saat mengirim ucapan:', error);
+        alert('Maaf, terjadi kendala saat mengirim ucapan. Silakan coba lagi.');
+    } finally {
+        if (btnKirim) {
+            btnKirim.disabled = false;
+            btnKirim.innerHTML = originalBtnText;
+        }
+    }
 }
