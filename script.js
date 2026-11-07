@@ -54,10 +54,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        const elDays = document.getElementById('days') || document.getElementById('day');
-        const elHours = document.getElementById('hours') || document.getElementById('hour');
-        const elMinutes = document.getElementById('minutes') || document.getElementById('minute');
-        const elSeconds = document.getElementById('seconds') || document.getElementById('second');
+        const elDays = document.getElementById('days');
+        const elHours = document.getElementById('hours');
+        const elMinutes = document.getElementById('minutes');
+        const elSeconds = document.getElementById('seconds');
 
         if (elDays) elDays.innerText = days;
         if (elHours) elHours.innerText = hours;
@@ -81,9 +81,95 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // 6. Inisialisasi Lightbox Galeri dengan Navigasi Next/Prev & Swipe
+    const modal = document.getElementById("lightbox-modal");
+    const modalImg = document.getElementById("lightbox-img");
+    const closeBtn = document.querySelector(".lightbox-close");
+    const prevBtn = document.querySelector(".lightbox-prev");
+    const nextBtn = document.querySelector(".lightbox-next");
+    const galleryImages = document.querySelectorAll(".galeri-item img");
+    let currentIndex = 0;
+
+    function showImage(index) {
+        if (index < 0) {
+            currentIndex = galleryImages.length - 1;
+        } else if (index >= galleryImages.length) {
+            currentIndex = 0;
+        } else {
+            currentIndex = index;
+        }
+        if (modalImg && galleryImages[currentIndex]) {
+            modalImg.src = galleryImages[currentIndex].src;
+        }
+    }
+
+    if (modal && galleryImages.length > 0) {
+        galleryImages.forEach((img, index) => {
+            img.addEventListener("click", function (e) {
+                e.stopPropagation();
+                modal.style.display = "flex";
+                showImage(index);
+            });
+        });
+
+        if (nextBtn) {
+            nextBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                showImage(currentIndex + 1);
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                showImage(currentIndex - 1);
+            });
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                modal.style.display = "none";
+            });
+        }
+
+        modal.addEventListener("click", function (e) {
+            if (e.target !== modalImg && e.target !== nextBtn && e.target !== prevBtn) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Navigasi Keyboard (PC)
+        document.addEventListener("keydown", function (e) {
+            if (modal.style.display === "flex") {
+                if (e.key === "ArrowRight") showImage(currentIndex + 1);
+                if (e.key === "ArrowLeft") showImage(currentIndex - 1);
+                if (e.key === "Escape") modal.style.display = "none";
+            }
+        });
+
+        // Fitur Swipe Layar (Handphone)
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        modal.addEventListener("touchstart", function (e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        modal.addEventListener("touchend", function (e) {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) {
+                showImage(currentIndex + 1); // Geser ke kiri (Next)
+            }
+            if (touchEndX > touchStartX + 50) {
+                showImage(currentIndex - 1); // Geser ke kanan (Prev)
+            }
+        }, { passive: true });
+    }
 });
 
-// 6. Fungsi untuk Membuka Undangan (Fade Out Lembut)
+// 7. Fungsi untuk Membuka Undangan (Fade Out Lembut)
 function bukaUndangan() {
     const heroCover = document.querySelector('.hero');
     
@@ -99,7 +185,7 @@ function bukaUndangan() {
     playMusic();
 }
 
-// 7. Pengaturan Musik & Audio Latar
+// 8. Pengaturan Musik & Audio Latar
 let backgroundMusic = new Audio('assets/lagu.mp3');
 backgroundMusic.loop = true;
 let isPlaying = false;
@@ -138,7 +224,7 @@ function playMusic() {
     });
 }
 
-// 8. Fungsi Tombol Auto-Scroll
+// 9. Fungsi Tombol Auto-Scroll
 let isAutoScrolling = false;
 let scrollInterval;
 
@@ -182,7 +268,7 @@ function stopAutoScroll() {
     }
 }
 
-// 9. Fungsi Kirim RSVP & Buku Tamu
+// 10. Fungsi Kirim RSVP & Buku Tamu
 function kirimUcapan(event) {
     event.preventDefault();
     
@@ -198,7 +284,7 @@ function kirimUcapan(event) {
     
     const itemBaru = document.createElement('div');
     itemBaru.style.cssText = "padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 8px; text-align: left;";
-    itemBaru.innerHTML = `<strong>${namaInput}</strong> <span style="font-size: 0.75rem; color: #2e7d32; font-weight: bold;">(${statusInput})</span><p style="font-size: 0.8rem; color: #555; margin-top: 4px;">${pesanItem}</p>`;
+    itemBaru.innerHTML = `<strong>${namaInput}</strong> <span style="font-size: 0.75rem; color: #2e7d32; font-weight: bold;">(${statusInput})</span><p style="font-size: 0.8rem; color: #555; margin-top: 4px;">${pesanInput}</p>`;
     
     daftarUcapanBox.prepend(itemBaru);
     
