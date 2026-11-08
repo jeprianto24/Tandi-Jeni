@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Pengelola Undangan - The Wedding of Tandi & Jeni</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Admin CSS -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <!-- ==========================================
+        1. PIN LOCK OVERLAY SCREEN
+        ========================================== -->
+    <div id="lock-screen">
+        <div class="pin-card">
+            <div class="pin-icon-wrap">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>PANEL PENGELOLA</h2>
+            <p>Masukkan PIN Keamanan untuk mengakses dashboard undangan</p>
+            
+            <form id="pin-form" onsubmit="verifikasiPin(event)">
+                <div class="pin-input-group">
+                    <input type="password" id="pin-input" class="pin-input" maxlength="8" placeholder="••••" autocomplete="off" autofocus>
+                    <div id="pin-error" class="pin-error"></div>
+                </div>
+                
+                <button type="submit" class="btn-unlock">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Buka Dashboard
+                </button>
+            </form>
+            
+            <p class="pin-hint">
+                <i class="fa-solid fa-circle-info"></i> PIN Bawaan: <strong>1234</strong> (Dapat diubah di menu Pengaturan)
+            </p>
+        </div>
+    </div>
+
+    <!-- ==========================================
+        2. NAVBAR ATAS & STATUS BAR
+        ========================================== -->
+    <header class="admin-navbar">
+        <div class="nav-brand">
+            <i class="fa-solid fa-ring"></i>
+            <div class="brand-text">
+                <h1>PANEL ADMIN UNDANGAN</h1>
+                <span id="nav-mempelai-text">The Wedding of Tandi & Jeni</span>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <div class="db-status-badge">
+                <span class="db-status-dot" id="db-status-dot"></span>
+                <span id="db-status-text">Database Terhubung</span>
+            </div>
+
+            <a href="index.html" target="_blank" class="btn-nav" title="Buka Halaman Undangan Asli">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Lihat Undangan
+            </a>
+
+            <button type="button" class="btn-nav btn-nav-logout" onclick="logoutAdmin()" title="Kunci Dashboard">
+                <i class="fa-solid fa-lock"></i> Kunci
+            </button>
+        </div>
+    </header>
+
+    <!-- ==========================================
+        3. TAB NAVIGATION BAR
+        ========================================== -->
+    <nav class="tabs-wrapper">
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </button>
+            <button class="tab-btn" onclick="switchTab('tujuan-undangan')">
+                <i class="fa-solid fa-users"></i> Tujuan Undangan (Tamu & Link)
+            </button>
+            <button class="tab-btn" onclick="switchTab('kelola-kata')">
+                <i class="fa-solid fa-pen-nib"></i> Kelola Kata-Kata
+            </button>
+            <button class="tab-btn" onclick="switchTab('kelola-foto')">
+                <i class="fa-solid fa-images"></i> Kelola Foto & Galeri
+            </button>
+            <button class="tab-btn" onclick="switchTab('kelola-rsvp')">
+                <i class="fa-solid fa-comments"></i> Buku Tamu & RSVP
+            </button>
+            <button class="tab-btn" onclick="switchTab('pengaturan')">
+                <i class="fa-solid fa-sliders"></i> Pengaturan & Backup
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==========================================
+        4. KONTEN ADMIN CONTAINER
+        ========================================== -->
+    <main class="admin-container">
+
+        <!-- ==========================================
+             TAB 1: DASHBOARD
+             ========================================== -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div class="section-header">
+                <h2>Ringkasan Undangan</h2>
+                <p>Pantau data tamu, konfirmasi kehadiran, dan aktivitas ucapan terbaru secara langsung.</p>
+            </div>
+
+            <!-- Stats Counters -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa-solid fa-address-book"></i></div>
+                    <div class="stat-info">
+                        <h3 id="dash-total-tamu">0</h3>
+                        <p>Total Tamu Terdaftar</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="stat-info">
+                        <h3 id="dash-hadir">0</h3>
+                        <p>Konfirmasi Hadir</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+                    <div class="stat-info">
+                        <h3 id="dash-tidak-hadir">0</h3>
+                        <p>Tidak Bisa Hadir</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon yellow"><i class="fa-solid fa-circle-question"></i></div>
+                    <div class="stat-info">
+                        <h3 id="dash-ragu">0</h3>
+                        <p>Masih Ragu-ragu</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon gold"><i class="fa-solid fa-heart"></i></div>
+                    <div class="stat-info">
+                        <h3 id="dash-total-ucapan">0</h3>
+                        <p>Total Doa & Ucapan</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Banner -->
+            <div class="quick-actions-card">
+                <div class="quick-actions-text">
+                    <h3>Aksi Cepat Pengelola Undangan</h3>
+                    <p>Kelola kebutuhan undangan pernikahan Anda hanya dengan beberapa klik praktis.</p>
+                </div>
+                <div class="quick-buttons">
+                    <button class="btn-quick" onclick="switchTab('tujuan-undangan'); focusTambahTamu();">
+                        <i class="fa-solid fa-user-plus"></i> Tambah Tamu Baru
+                    </button>
+                    <button class="btn-quick" onclick="switchTab('kelola-kata')">
+                        <i class="fa-solid fa-edit"></i> Edit Teks & Acara
+                    </button>
+                    <button class="btn-quick" onclick="switchTab('kelola-foto')">
+                        <i class="fa-solid fa-image"></i> Ganti Foto & Galeri
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ringkasan Ucapan Terbaru -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-clock-rotate-left"></i> Ucapan Tamu Terbaru</span>
+                    <button class="btn-secondary" onclick="switchTab('kelola-rsvp')">Lihat Semua</button>
+                </div>
+                <div id="dash-recent-ucapan">
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Memuat daftar ucapan...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 2: TUJUAN UNDANGAN (TAMU & LINK GENERATOR)
+             ========================================== -->
+        <section id="tab-tujuan-undangan" class="tab-content">
+            <div class="section-header">
+                <h2>Kelola Tujuan Undangan & Generator Link</h2>
+                <p>Buat tautan personal untuk setiap tamu dan kirimkan undangan via WhatsApp dengan 1 klik.</p>
+            </div>
+
+            <!-- Form Tambah Tamu Tunggal -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-user-plus"></i> Tambah Tamu & Buat Link Personal</span>
+                </div>
+                
+                <form id="form-tambah-tamu" onsubmit="tambahTamu(event)">
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label>Nama Tamu / Penerima <span class="required">*</span></label>
+                            <input type="text" id="tamu-nama" class="form-control" required placeholder="Contoh: Bpk. Yohanes & Keluarga" oninput="updateLiveLinkPreview()">
+                            <p class="form-help">Nama ini otomatis tampil di sampul depan undangan digital.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kategori Tamu</label>
+                            <select id="tamu-kategori" class="form-control">
+                                <option value="Keluarga">Keluarga</option>
+                                <option value="Sahabat">Sahabat / Teman</option>
+                                <option value="Rekan Kerja">Rekan Kerja</option>
+                                <option value="VIP">VIP</option>
+                                <option value="Umum" selected>Umum</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nomor WhatsApp (Opsional)</label>
+                            <input type="text" id="tamu-telepon" class="form-control" placeholder="081234567890">
+                            <p class="form-help">Untuk langsung membuka chat WhatsApp ke tamu.</p>
+                        </div>
+                    </div>
+
+                    <!-- Live Link Preview Box -->
+                    <div style="background: #f8fafc; border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+                        <div>
+                            <span style="font-size: 0.76rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Preview Tautan Khusus Tamu:</span>
+                            <div id="live-link-preview" style="font-family: monospace; font-size: 0.85rem; color: var(--primary); word-break: break-all; margin-top: 2px;">
+                                - Ketik nama tamu di atas -
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-secondary" onclick="salinLiveLink()">
+                                <i class="fa-regular fa-copy"></i> Salin Link
+                            </button>
+                            <button type="button" class="btn-secondary" onclick="bukaLivePreview()">
+                                <i class="fa-solid fa-eye"></i> Tes Buka
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="submit" class="btn-gold">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan ke Daftar Tamu
+                        </button>
+                        <button type="button" class="btn-primary" onclick="kirimWaTamuForm()">
+                            <i class="fa-brands fa-whatsapp"></i> Kirim Langsung via WhatsApp
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Generator Massal (Bulk Import) -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-users-viewfinder"></i> Import Banyak Tamu Sekaligus (Bulk Generator)</span>
+                </div>
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Tempelkan daftar nama tamu dari Excel, Notepad, atau Chat WhatsApp (satu nama per baris). Sistem akan otomatis membuatkan tautan khusus untuk seluruh nama tersebut!
+                </p>
+                <form onsubmit="importBanyakTamu(event)">
+                    <div class="form-group">
+                        <textarea id="bulk-nama-input" class="form-control" rows="5" placeholder="Bpk. Hendra & Istri&#10;Ibu Maria&#10;Dr. Alex Pratama&#10;Keluarga Besar Opa Samuel"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="min-width: 180px;">
+                            <select id="bulk-kategori" class="form-control">
+                                <option value="Keluarga">Kategori: Keluarga</option>
+                                <option value="Sahabat">Kategori: Sahabat</option>
+                                <option value="Rekan Kerja">Kategori: Rekan Kerja</option>
+                                <option value="VIP">Kategori: VIP</option>
+                                <option value="Umum" selected>Kategori: Umum</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-secondary">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Semua Tamu
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabel Daftar Tamu -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-list-check"></i> Daftar Tamu Undangan (<span id="tamu-count-badge">0</span>)</span>
+                    <button class="btn-secondary" onclick="eksporTamuCSV()">
+                        <i class="fa-solid fa-file-excel"></i> Download Excel/CSV
+                    </button>
+                </div>
+
+                <!-- Filter & Search Bar -->
+                <div class="guest-filter-bar">
+                    <div class="search-input-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="cari-tamu" class="form-control" placeholder="Cari nama tamu..." oninput="renderTabelTamu()">
+                    </div>
+
+                    <div style="min-width: 150px;">
+                        <select id="filter-kategori" class="form-control" onchange="renderTabelTamu()">
+                            <option value="Semua">Semua Kategori</option>
+                            <option value="Keluarga">Keluarga</option>
+                            <option value="Sahabat">Sahabat</option>
+                            <option value="Rekan Kerja">Rekan Kerja</option>
+                            <option value="VIP">VIP</option>
+                            <option value="Umum">Umum</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama Tamu</th>
+                                <th>Kategori</th>
+                                <th>WhatsApp</th>
+                                <th>Tautan Undangan</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tamu-table-body">
+                            <!-- Diisi via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 3: KELOLA KATA-KATA (KONTEN TEKS)
+             ========================================== -->
+        <section id="tab-kelola-kata" class="tab-content">
+            <div class="section-header">
+                <h2>Kelola Kata-Kata & Teks Undangan</h2>
+                <p>Ubah nama mempelai, ayat kitab suci, tanggal acara, lokasi, hingga salam penutup.</p>
+            </div>
+
+            <form id="form-kata-kata" onsubmit="simpanKataKata(event)">
+                <!-- 1. Judul & Pembuka -->
+                <div class="admin-card">
+                    <div class="card-title">
+                        <span class="card-title-icon"><i class="fa-solid fa-heading"></i> Judul & Kutipan Ayat Suci</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sub-Judul Sampul</label>
+                        <input type="text" id="text-sub-title" class="form-control" placeholder="THE WEDDING OF">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Isi Kutipan Ayat / Kata Mutiara</label>
+                        <textarea id="text-ayat" class="form-control" rows="3" placeholder="Tuliskan ayat atau kutipan suci..."></textarea>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Sumber Ayat / Referensi</label>
+                            <input type="text" id="text-surah" class="form-control" placeholder="(Matius 19:6)">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Teks Salam Pembuka</label>
+                            <input type="text" id="text-salam-pembuka" class="form-control" placeholder="Atas Kasih dan Karunia Tuhan Yesus Kristus...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Data Mempelai Pria & Wanita -->
+                <div class="admin-card">
+                    <div class="card-title">
+                        <span class="card-title-icon"><i class="fa-solid fa-heart"></i> Profil Kedua Mempelai</span>
+                    </div>
+
+                    <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 0.95rem;">🤵 Data Mempelai Pria</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Nama Panggilan Pria</label>
+                            <input type="text" id="pria-panggilan" class="form-control" required placeholder="Tandi">
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Lengkap & Gelar</label>
+                            <input type="text" id="pria-nama-lengkap" class="form-control" required placeholder="Tandipuang, S.T">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Keterangan Orang Tua Pria</label>
+                            <textarea id="pria-orang-tua" class="form-control" rows="2" placeholder="Putra dari Pasangan Bpk..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Link Instagram Pria</label>
+                            <input type="url" id="pria-instagram" class="form-control" placeholder="https://instagram.com/username">
+                        </div>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 15px 0 20px;">
+
+                    <h4 style="color: var(--primary); margin-bottom: 12px; font-size: 0.95rem;">👰 Data Mempelai Wanita</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Nama Panggilan Wanita</label>
+                            <input type="text" id="wanita-panggilan" class="form-control" required placeholder="Jeni">
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Lengkap & Gelar</label>
+                            <input type="text" id="wanita-nama-lengkap" class="form-control" required placeholder="Jeniati, S.Pd, Gr.">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Keterangan Orang Tua Wanita</label>
+                            <textarea id="wanita-orang-tua" class="form-control" rows="2" placeholder="Putri dari Pasangan Bpk..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Link Instagram Wanita</label>
+                            <input type="url" id="wanita-instagram" class="form-control" placeholder="https://instagram.com/username">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Rangkaian Acara (3 Card Acara) & Countdown -->
+                <div class="admin-card">
+                    <div class="card-title">
+                        <span class="card-title-icon"><i class="fa-solid fa-calendar-days"></i> Rangkaian Acara & Countdown Timer</span>
+                    </div>
+
+                    <div class="form-group" style="background: #fdfbf7; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: var(--radius-sm); padding: 14px;">
+                        <label style="color: var(--gold-dark);"><i class="fa-solid fa-stopwatch"></i> Target Tanggal Countdown Timer Utama</label>
+                        <input type="datetime-local" id="countdown-date-input" class="form-control" style="max-width: 300px;">
+                        <p class="form-help">Waktu ini digunakan untuk menghitung mundur sisa Hari, Jam, Menit, dan Detik di website.</p>
+                    </div>
+
+                    <!-- Acara 1 -->
+                    <h4 style="margin: 18px 0 10px; color: var(--primary);">📌 Acara 1: Ibadah Persiapan</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Judul Acara 1</label>
+                            <input type="text" id="acara1-judul" class="form-control" placeholder="IBADAH PERSIAPAN">
+                        </div>
+                        <div class="form-group">
+                            <label>Hari & Tanggal</label>
+                            <input type="text" id="acara1-tanggal" class="form-control" placeholder="Kamis, 31 Desember 2026">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Waktu / Jam</label>
+                            <input type="text" id="acara1-jam" class="form-control" placeholder="Pukul 16.00 WITA - Selesai">
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi / Alamat</label>
+                            <input type="text" id="acara1-lokasi" class="form-control" placeholder="Rumah Kediaman Mempelai Perempuan...">
+                        </div>
+                    </div>
+
+                    <!-- Acara 2 -->
+                    <h4 style="margin: 18px 0 10px; color: var(--primary);">📌 Acara 2: Pemberkatan Pernikahan</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Judul Acara 2</label>
+                            <input type="text" id="acara2-judul" class="form-control" placeholder="PEMBERKATAN PERKAWINAN">
+                        </div>
+                        <div class="form-group">
+                            <label>Hari & Tanggal</label>
+                            <input type="text" id="acara2-tanggal" class="form-control" placeholder="Kamis, 31 Desember 2026">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Waktu / Jam</label>
+                            <input type="text" id="acara2-jam" class="form-control" placeholder="Pukul 08.00 WITA - Selesai">
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi / Alamat</label>
+                            <input type="text" id="acara2-lokasi" class="form-control" placeholder="Gedung Gereja Jemaat Bahtera Pongka">
+                        </div>
+                    </div>
+
+                    <!-- Acara 3 -->
+                    <h4 style="margin: 18px 0 10px; color: var(--primary);">📌 Acara 3: Resepsi Pernikahan</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Judul Acara 3</label>
+                            <input type="text" id="acara3-judul" class="form-control" placeholder="RESEPSI PERNIKAHAN">
+                        </div>
+                        <div class="form-group">
+                            <label>Hari & Tanggal</label>
+                            <input type="text" id="acara3-tanggal" class="form-control" placeholder="Kamis, 31 Desember 2026">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Waktu / Jam</label>
+                            <input type="text" id="acara3-jam" class="form-control" placeholder="Pukul 12.00 WITA - Selesai">
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi / Alamat</label>
+                            <input type="text" id="acara3-lokasi" class="form-control" placeholder="Rumah Kediaman Mempelai Perempuan...">
+                        </div>
+                    </div>
+
+                    <!-- Maps -->
+                    <h4 style="margin: 18px 0 10px; color: var(--primary);">🗺️ Peta Google Maps</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Link Tombol Buka Google Maps</label>
+                            <input type="url" id="maps-url" class="form-control" placeholder="https://maps.google.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>URL Embed Google Maps (Iframe)</label>
+                            <input type="text" id="maps-embed" class="form-control" placeholder="https://www.google.com/maps/embed?...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Penutup -->
+                <div class="admin-card">
+                    <div class="card-title">
+                        <span class="card-title-icon"><i class="fa-solid fa-envelope-open-text"></i> Pesan Penutup Undangan</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teks Salam Penutup</label>
+                        <textarea id="text-penutup" class="form-control" rows="3" placeholder="Merupakan suatu kehormatan dan kebahagiaan..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ucapan Hormat</label>
+                        <input type="text" id="text-hormat" class="form-control" placeholder="Tuhan Yesus Memberkati,">
+                    </div>
+                </div>
+
+                <!-- Sticky Save Bar -->
+                <div class="sticky-save-bar">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Pastikan data telah terisi dengan benar.</span>
+                    <button type="submit" class="btn-gold">
+                        <i class="fa-solid fa-check"></i> Simpan Perubahan Kata-Kata
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ==========================================
+             TAB 4: KELOLA FOTO & GALERI
+             ========================================== -->
+        <section id="tab-kelola-foto" class="tab-content">
+            <div class="section-header">
+                <h2>Kelola Foto & Galeri Undangan</h2>
+                <p>Ganti foto pasangan, foto kedua mempelai, dan kelola galeri momen bahagia langsung dari perangkat Anda.</p>
+            </div>
+
+            <!-- Foto Pasangan / Cover Utama -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-panorama"></i> Foto Sampul Depan / Cover Pasangan</span>
+                </div>
+                
+                <div class="form-grid-2" style="align-items: center;">
+                    <div>
+                        <div class="photo-preview-wrap">
+                            <img id="preview-cover-foto" src="assets/pasangan.jpeg" alt="Preview Cover" class="photo-preview-img">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="photo-uploader-box" for="input-upload-cover">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <strong>Klik untuk Unggah Foto Baru</strong>
+                            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Format JPG, PNG, atau WEBP (Otomatis dikompres)</p>
+                            <input type="file" id="input-upload-cover" accept="image/*" style="display: none;" onchange="handleUploadFotoTunggal(event, 'preview-cover-foto', 'coverFoto')">
+                        </label>
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 0.8rem; font-weight: 600;">Atau gunakan URL / Jalur File:</label>
+                            <input type="text" id="input-url-cover" class="form-control" placeholder="assets/pasangan.jpeg" onchange="updatePreviewFoto('preview-cover-foto', this.value, 'coverFoto')">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Foto Mempelai Pria & Wanita -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-user-tie"></i> Foto Profil Mempelai (Bulat)</span>
+                </div>
+
+                <div class="form-grid-2">
+                    <!-- Foto Pria -->
+                    <div style="text-align: center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px;">
+                        <h4 style="margin-bottom: 12px; color: var(--primary);">Foto Mempelai Pria</h4>
+                        <img id="preview-pria-foto" src="assets/pria.jpeg" alt="Pria" class="photo-preview-circle">
+                        
+                        <div style="margin-top: 15px;">
+                            <label class="btn-secondary" for="input-upload-pria" style="cursor: pointer;">
+                                <i class="fa-solid fa-camera"></i> Ganti Foto Pria
+                            </label>
+                            <input type="file" id="input-upload-pria" accept="image/*" style="display: none;" onchange="handleUploadFotoMempelai(event, 'pria')">
+                        </div>
+                        <input type="text" id="input-url-pria" class="form-control" placeholder="assets/pria.jpeg" style="margin-top: 8px;" onchange="updateFotoMempelaiUrl('pria', this.value)">
+                    </div>
+
+                    <!-- Foto Wanita -->
+                    <div style="text-align: center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px;">
+                        <h4 style="margin-bottom: 12px; color: var(--primary);">Foto Mempelai Wanita</h4>
+                        <img id="preview-wanita-foto" src="assets/wanita.jpeg" alt="Wanita" class="photo-preview-circle">
+                        
+                        <div style="margin-top: 15px;">
+                            <label class="btn-secondary" for="input-upload-wanita" style="cursor: pointer;">
+                                <i class="fa-solid fa-camera"></i> Ganti Foto Wanita
+                            </label>
+                            <input type="file" id="input-upload-wanita" accept="image/*" style="display: none;" onchange="handleUploadFotoMempelai(event, 'wanita')">
+                        </div>
+                        <input type="text" id="input-url-wanita" class="form-control" placeholder="assets/wanita.jpeg" style="margin-top: 8px;" onchange="updateFotoMempelaiUrl('wanita', this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Galeri Foto "Moment Bahagia" -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-photo-film"></i> Galeri Foto "Moment Bahagia" (<span id="galeri-count-badge">0</span> Foto)</span>
+                    <div style="display: flex; gap: 8px;">
+                        <label class="btn-gold" for="input-tambah-galeri" style="cursor: pointer;">
+                            <i class="fa-solid fa-plus"></i> Tambah Foto
+                        </label>
+                        <input type="file" id="input-tambah-galeri" accept="image/*" multiple style="display: none;" onchange="handleTambahGaleriFile(event)">
+                        <button class="btn-secondary" onclick="resetGaleriBawaan()">
+                            <i class="fa-solid fa-rotate-left"></i> Reset ke Foto Bawaan
+                        </button>
+                    </div>
+                </div>
+
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Anda dapat menambah foto baru dari HP/komputer atau menghapus foto yang tidak diinginkan dari galeri.
+                </p>
+
+                <!-- URL Tambah Cepat -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="input-tambah-galeri-url" class="form-control" placeholder="Atau masukkan URL / path gambar (contoh: assets/1.jpeg)">
+                    <button type="button" class="btn-secondary" onclick="tambahGaleriDariUrl()">Tambah</button>
+                </div>
+
+                <!-- Grid Galeri -->
+                <div id="galeri-admin-grid" class="gallery-admin-grid">
+                    <!-- Diisi via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Sticky Save Bar -->
+            <div class="sticky-save-bar">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Simpan semua perubahan foto ke sistem undangan.</span>
+                <button type="button" class="btn-gold" onclick="simpanPengaturanFoto()">
+                    <i class="fa-solid fa-check"></i> Simpan Pengaturan Foto
+                </button>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 5: KELOLA RSVP & BUKU TAMU
+             ========================================== -->
+        <section id="tab-kelola-rsvp" class="tab-content">
+            <div class="section-header">
+                <h2>Moderasi Buku Tamu & RSVP</h2>
+                <p>Pantau seluruh ucapan doa dari tamu serta moderasi atau hapus pesan yang tidak sesuai.</p>
+            </div>
+
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-comments"></i> Seluruh Doa & Ucapan Masuk</span>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <select id="filter-rsvp-status" class="form-control" style="width: auto;" onchange="renderDaftarRsvpAdmin()">
+                            <option value="Semua">Semua Kehadiran</option>
+                            <option value="Hadir">Hadir</option>
+                            <option value="Tidak Hadir">Tidak Hadir</option>
+                            <option value="Ragu-ragu">Ragu-ragu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="rsvp-admin-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Diisi via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 6: PENGATURAN & BACKUP
+             ========================================== -->
+        <section id="tab-pengaturan" class="tab-content">
+            <div class="section-header">
+                <h2>Pengaturan Sistem & Cadangan Data</h2>
+                <p>Konfigurasi musik latar, keamanan PIN admin, serta ekspor & impor seluruh data undangan.</p>
+            </div>
+
+            <!-- Musik Latar -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-music"></i> Pengaturan Musik & Lagu Latar</span>
+                </div>
+                <div class="form-group">
+                    <label>Jalur File Lagu / URL Audio MP3</label>
+                    <input type="text" id="setting-music-url" class="form-control" placeholder="assets/lagu.mp3">
+                    <p class="form-help">Bawaan: <code>assets/lagu.mp3</code>. Anda dapat mengganti dengan URL audio MP3 online lainnya.</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn-secondary" onclick="tesLaguPreview()">
+                        <i class="fa-solid fa-play" id="icon-preview-lagu"></i> Putar Lagu
+                    </button>
+                    <button class="btn-gold" onclick="simpanMusik()">Simpan Lagu</button>
+                </div>
+            </div>
+
+            <!-- Ganti PIN Admin -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-key"></i> Ganti PIN Keamanan Admin</span>
+                </div>
+                <form onsubmit="gantiPinAdmin(event)">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>PIN Baru (4-8 Digit Angka)</label>
+                            <input type="password" id="pin-baru" class="form-control" required maxlength="8" placeholder="Contoh: 5678">
+                        </div>
+                        <div class="form-group">
+                            <label>Konfirmasi PIN Baru</label>
+                            <input type="password" id="pin-konfirmasi" class="form-control" required maxlength="8" placeholder="Ketik ulang PIN baru">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-shield-halved"></i> Perbarui PIN Admin
+                    </button>
+                </form>
+            </div>
+
+            <!-- Backup & Restore -->
+            <div class="admin-card">
+                <div class="card-title">
+                    <span class="card-title-icon"><i class="fa-solid fa-database"></i> Cadangkan & Pulihkan (Backup / Restore)</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Simpan salinan cadangan seluruh data teks, foto, dan daftar tamu ke file komputer atau pulihkan dari file cadangan sebelumnya.
+                </p>
+
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn-secondary" onclick="eksporBackupJson()">
+                        <i class="fa-solid fa-download"></i> Unduh Cadangan JSON
+                    </button>
+                    
+                    <label class="btn-secondary" for="input-restore-json" style="cursor: pointer;">
+                        <i class="fa-solid fa-upload"></i> Pulihkan dari File JSON
+                    </label>
+                    <input type="file" id="input-restore-json" accept=".json" style="display: none;" onchange="imporBackupJson(event)">
+
+                    <button class="btn-danger" onclick="konfirmasiResetPabrik()">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Reset Semua ke Pengaturan Awal
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="wedding-data.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
