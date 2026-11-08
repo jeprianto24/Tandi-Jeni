@@ -93,10 +93,35 @@ const DEFAULT_SETTINGS = {
         "assets/12.jpeg"
     ],
     
-    // Musik & Keamanan
+    // Musik & Keamanan Kriptografis
     musicUrl: "assets/lagu.mp3",
-    adminPin: "1234"
+    // Hash SHA-256 untuk default PIN '1234' dengan salt
+    adminPinHash: "b6c0331867dc75a921770355164bdce5444cbda53e63f90aaa63db49bd7ee9b1"
 };
+
+// --------------------------------------------------------------------------
+// HELPER KRIPTOGRAFI KEAMANAN (SHA-256 DENGAN SALT)
+// --------------------------------------------------------------------------
+const SECURITY_SALT = "wedding_secret_salt_2026";
+
+async function hashPin(pin) {
+    if (!pin) return "";
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(SECURITY_SALT + String(pin));
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    } catch (e) {
+        // Fallback hashing jika subtle crypto tidak tersedia
+        let h = 0;
+        const str = SECURITY_SALT + String(pin);
+        for (let i = 0; i < str.length; i++) {
+            h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+        }
+        return "fallback_" + Math.abs(h);
+    }
+}
 
 // Helper deep merge
 function mergeDeep(target, source) {
@@ -132,7 +157,12 @@ const WeddingSettings = {
     },
 
     async save(newSettings) {
+        if (newSettings.adminPin) {
+            newSettings.adminPinHash = await hashPin(newSettings.adminPin);
+            delete newSettings.adminPin;
+        }
         const merged = mergeDeep(this.get(), newSettings);
+        if (merged.adminPin) delete merged.adminPin; // Pastikan plaintext PIN dibuang
         try {
             localStorage.setItem('wedding_settings', JSON.stringify(merged));
             window.dispatchEvent(new CustomEvent('wedding_settings_updated', { detail: merged }));

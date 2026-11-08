@@ -42,6 +42,100 @@ body {
 }
 
 /* --------------------------------------------------------------------------
+   0. PENYAMARAN AKSES (STEALTH CLOAK 404)
+   -------------------------------------------------------------------------- */
+.stealth-cloak {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #f7fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    padding: 20px;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.stealth-cloak.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.cloak-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 40px 30px;
+    max-width: 440px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    border: 1px solid var(--border-color);
+    animation: zoomIn 0.3s ease;
+}
+
+.cloak-code {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #cbd5e0;
+    line-height: 1;
+    margin-bottom: 12px;
+    letter-spacing: -2px;
+    user-select: none;
+    cursor: default;
+    transition: color 0.3s ease;
+}
+
+.cloak-card h2 {
+    font-size: 1.35rem;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.cloak-card p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.btn-cloak {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    text-decoration: none;
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+
+.btn-cloak:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.lockout-banner {
+    background: #fff5f5;
+    border: 1px solid #feb2b2;
+    border-radius: var(--radius-sm);
+    color: #c53030;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 600;
+    line-height: 1.4;
+    animation: fadeIn 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
    1. PIN LOCK OVERLAY SCREEN
    -------------------------------------------------------------------------- */
 #lock-screen {

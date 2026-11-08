@@ -1064,36 +1064,4 @@ section {
     animation: zoomIn 0.3s ease;
 }
 
-/* ==========================================
-   TOMBOL AKSES ADMIN (KELOLA UNDANGAN)
-   ========================================== */
-.admin-access-box {
-    text-align: center;
-    padding: 25px 15px 40px;
-}
-
-.btn-akses-admin {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(212, 175, 55, 0.12);
-    color: #8c7322;
-    border: 1px solid rgba(212, 175, 55, 0.35);
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-}
-
-.btn-akses-admin:hover {
-    background: #d4af37;
-    color: #ffffff;
-    border-color: #d4af37;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-}
-
 

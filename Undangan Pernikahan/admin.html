@@ -17,23 +17,42 @@
 <body>
 
     <!-- ==========================================
+        0. PENYAMARAN AKSES (STEALTH CLOAK 404)
+        Ditampilkan jika halaman diakses langsung tanpa izin
+        ========================================== -->
+    <div id="stealth-cloak" class="stealth-cloak">
+        <div class="cloak-card">
+            <div class="cloak-code-wrap">
+                <h1 id="cloak-code" class="cloak-code" title="404 Not Found">404</h1>
+            </div>
+            <h2>Halaman Tidak Ditemukan</h2>
+            <p>Tautan yang Anda tuju mungkin salah, telah dipindahkan, atau sedang dalam pemeliharaan sistem.</p>
+            <a href="index.html" class="btn-cloak">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Undangan
+            </a>
+        </div>
+    </div>
+
+    <!-- ==========================================
         1. PIN LOCK OVERLAY SCREEN
         ========================================== -->
-    <div id="lock-screen">
+    <div id="lock-screen" class="hidden">
         <div class="pin-card">
             <div class="pin-icon-wrap">
-                <i class="fa-solid fa-lock"></i>
+                <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h2>PANEL PENGELOLA</h2>
             <p>Masukkan PIN Keamanan untuk mengakses dashboard undangan</p>
+
+            <div id="lockout-banner" class="lockout-banner" style="display: none;"></div>
             
             <form id="pin-form" onsubmit="verifikasiPin(event)">
                 <div class="pin-input-group">
-                    <input type="password" id="pin-input" class="pin-input" maxlength="8" placeholder="••••" autocomplete="off" autofocus>
+                    <input type="password" id="pin-input" class="pin-input" maxlength="8" placeholder="••••" autocomplete="off">
                     <div id="pin-error" class="pin-error"></div>
                 </div>
                 
-                <button type="submit" class="btn-unlock">
+                <button type="submit" id="btn-unlock" class="btn-unlock">
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> Buka Dashboard
                 </button>
             </form>

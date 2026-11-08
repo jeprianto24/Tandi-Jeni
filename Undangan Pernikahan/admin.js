@@ -16,8 +16,8 @@ let tempFotoPria = null;
 let tempFotoWanita = null;
 
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Cek Sesi Autentikasi PIN
-    cekSesiAdmin();
+    // 1. Inisialisasi Penyamaran Akses (Stealth Gatekeeper 404) & Sesi Kriptografis
+    initStealthGatekeeper();
 
     // 2. Dengarkan Status Database Firebase
     cekStatusKoneksiDb();
@@ -42,45 +42,225 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // --------------------------------------------------------------------------
-// 1. KEAMANAN PIN & AUTENTIKASI
+// 1. PENYAMARAN AKSES (STEALTH GATEKEEPER 404) & KEAMANAN KRIPTOGRAFIS
 // --------------------------------------------------------------------------
-function cekSesiAdmin() {
-    const isAuth = sessionStorage.getItem('wedding_admin_auth') === 'true';
+let lockoutInterval = null;
+
+function isSessionValid() {
+    const token = sessionStorage.getItem('wedding_session_token');
+    const expiry = parseInt(sessionStorage.getItem('wedding_session_expiry') || '0', 10);
+    if (token && expiry > Date.now()) {
+        return true;
+    }
+    // Sesi kedaluwarsa atau belum ada
+    sessionStorage.removeItem('wedding_session_token');
+    sessionStorage.removeItem('wedding_session_expiry');
+    return false;
+}
+
+function initStealthGatekeeper() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSecretKey = urlParams.get('portal') === 'secret' || 
+                         urlParams.has('secret') || 
+                         window.location.hash === '#portal=secret';
+    
+    const cloak = document.getElementById('stealth-cloak');
     const lockScreen = document.getElementById('lock-screen');
-    if (isAuth && lockScreen) {
-        lockScreen.classList.add('hidden');
+
+    // Jika memiliki kunci rahasia atau sudah memiliki sesi login aktif yang valid
+    if (hasSecretKey || isSessionValid()) {
+        if (cloak) cloak.classList.add('hidden');
+
+        // Bersihkan parameter rahasia dari URL agar tidak tersimpan di riwayat browser
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        if (isSessionValid()) {
+            if (lockScreen) lockScreen.classList.add('hidden');
+        } else {
+            if (lockScreen) lockScreen.classList.remove('hidden');
+            checkLockoutStatus();
+            setTimeout(() => {
+                const pinInput = document.getElementById('pin-input');
+                if (pinInput && !pinInput.disabled) pinInput.focus();
+            }, 300);
+        }
+    } else {
+        // Tampilkan penyamaran 404 jika diakses sembarangan
+        if (cloak) cloak.classList.remove('hidden');
+        if (lockScreen) lockScreen.classList.add('hidden');
+
+        // Easter Egg: Klik 5x pada teks "404" untuk membuka panel admin secara rahasia
+        let tapCloakCount = 0;
+        let tapCloakTimer = null;
+        const cloakCode = document.getElementById('cloak-code');
+        if (cloakCode) {
+            cloakCode.addEventListener('click', function () {
+                tapCloakCount++;
+                clearTimeout(tapCloakTimer);
+                if (tapCloakCount >= 5) {
+                    tapCloakCount = 0;
+                    revealSecretLockScreen();
+                } else {
+                    tapCloakTimer = setTimeout(() => { tapCloakCount = 0; }, 2000);
+                }
+            });
+        }
+
+        // Keyboard Shortcut: Ctrl + Shift + A
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+                e.preventDefault();
+                revealSecretLockScreen();
+            }
+        });
     }
 }
 
-function verifikasiPin(event) {
+function revealSecretLockScreen() {
+    const cloak = document.getElementById('stealth-cloak');
+    const lockScreen = document.getElementById('lock-screen');
+    if (cloak) cloak.classList.add('hidden');
+    if (lockScreen) lockScreen.classList.remove('hidden');
+    checkLockoutStatus();
+    setTimeout(() => {
+        const pinInput = document.getElementById('pin-input');
+        if (pinInput && !pinInput.disabled) pinInput.focus();
+    }, 200);
+    showToast("Gerbang akses admin terbuka.", "info");
+}
+
+function checkLockoutStatus() {
+    const lockoutUntil = parseInt(localStorage.getItem('wedding_lockout_until') || '0', 10);
+    const banner = document.getElementById('lockout-banner');
+    const pinInput = document.getElementById('pin-input');
+    const btnUnlock = document.getElementById('btn-unlock');
+
+    if (lockoutInterval) clearInterval(lockoutInterval);
+
+    if (Date.now() < lockoutUntil) {
+        if (pinInput) pinInput.disabled = true;
+        if (btnUnlock) btnUnlock.disabled = true;
+        if (banner) banner.style.display = 'block';
+
+        const updateCountdown = () => {
+            const sisaMs = lockoutUntil - Date.now();
+            if (sisaMs <= 0) {
+                clearInterval(lockoutInterval);
+                if (pinInput) {
+                    pinInput.disabled = false;
+                    pinInput.focus();
+                }
+                if (btnUnlock) btnUnlock.disabled = false;
+                if (banner) banner.style.display = 'none';
+                localStorage.removeItem('wedding_lockout_until');
+                localStorage.removeItem('wedding_failed_attempts');
+                const pinError = document.getElementById('pin-error');
+                if (pinError) pinError.innerText = '';
+                return;
+            }
+
+            const totalDetik = Math.ceil(sisaMs / 1000);
+            const menit = Math.floor(totalDetik / 60);
+            const detik = totalDetik % 60;
+            const strDetik = String(detik).padStart(2, '0');
+
+            if (banner) {
+                banner.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Akses diblokir sementara karena proteksi peretasan brute-force.<br>Coba lagi dalam: <strong>${menit}:${strDetik}</strong>`;
+            }
+        };
+
+        updateCountdown();
+        lockoutInterval = setInterval(updateCountdown, 1000);
+    } else {
+        if (pinInput) pinInput.disabled = false;
+        if (btnUnlock) btnUnlock.disabled = false;
+        if (banner) banner.style.display = 'none';
+    }
+}
+
+async function verifikasiPin(event) {
     if (event) event.preventDefault();
+
+    // Cek apakah sedang dalam masa blokir lockout
+    const lockoutUntil = parseInt(localStorage.getItem('wedding_lockout_until') || '0', 10);
+    if (Date.now() < lockoutUntil) {
+        checkLockoutStatus();
+        return;
+    }
+
     const pinInput = document.getElementById('pin-input');
     const pinError = document.getElementById('pin-error');
     const inputVal = pinInput ? pinInput.value.trim() : '';
 
-    const settings = currentSettings || WeddingSettings.get();
-    const correctPin = settings.adminPin || "1234";
+    if (!inputVal) return;
 
-    if (inputVal === correctPin) {
-        sessionStorage.setItem('wedding_admin_auth', 'true');
+    // Verifikasi hash SHA-256
+    const inputHash = await hashPin(inputVal);
+    const settings = currentSettings || WeddingSettings.get();
+    
+    // Hash target (default jika belum ada: hash dari '1234')
+    let targetHash = settings.adminPinHash;
+    if (!targetHash && settings.adminPin) {
+        targetHash = await hashPin(settings.adminPin);
+    }
+    if (!targetHash) {
+        targetHash = "b6c0331867dc75a921770355164bdce5444cbda53e63f90aaa63db49bd7ee9b1";
+    }
+
+    if (inputHash === targetHash) {
+        // Berhasil login
+        localStorage.removeItem('wedding_failed_attempts');
+        localStorage.removeItem('wedding_lockout_until');
+
+        // Buat token sesi kriptografis dengan masa aktif 2 jam
+        const sessionToken = await hashPin('sess_' + Date.now() + '_' + Math.random());
+        sessionStorage.setItem('wedding_session_token', sessionToken);
+        sessionStorage.setItem('wedding_session_expiry', Date.now() + 2 * 60 * 60 * 1000);
+
         const lockScreen = document.getElementById('lock-screen');
         if (lockScreen) {
             lockScreen.classList.add('hidden');
         }
-        showToast("Selamat datang di Panel Admin!", "success");
+        if (pinInput) pinInput.value = '';
+        if (pinError) pinError.innerText = '';
+
+        showToast("Otorisasi berhasil. Selamat datang di Panel Admin!", "success");
     } else {
-        if (pinError) {
-            pinError.innerText = "PIN salah. Silakan coba lagi.";
-        }
+        // Gagal login: tingkatkan counter percobaan gagal
+        let failed = parseInt(localStorage.getItem('wedding_failed_attempts') || '0', 10) + 1;
+        localStorage.setItem('wedding_failed_attempts', failed);
+
         if (pinInput) {
             pinInput.value = '';
             pinInput.focus();
+        }
+
+        if (failed >= 5) {
+            // Blokir 15 Menit setelah 5x gagal berturut-turut
+            const lockoutTime = Date.now() + 15 * 60 * 1000;
+            localStorage.setItem('wedding_lockout_until', lockoutTime);
+            checkLockoutStatus();
+            showToast("Terlalu banyak percobaan gagal! Akses diblokir 15 menit.", "danger");
+        } else if (failed >= 3) {
+            // Cooldown 30 Detik setelah 3x gagal
+            const lockoutTime = Date.now() + 30 * 1000;
+            localStorage.setItem('wedding_lockout_until', lockoutTime);
+            checkLockoutStatus();
+            if (pinError) pinError.innerText = `PIN salah (Percobaan ${failed}/5). Menunggu 30 detik...`;
+        } else {
+            const sisa = 5 - failed;
+            if (pinError) {
+                pinError.innerText = `PIN tidak valid. Sisa kesempatan sebelum diblokir: ${sisa}`;
+            }
         }
     }
 }
 
 function logoutAdmin() {
-    sessionStorage.removeItem('wedding_admin_auth');
+    sessionStorage.removeItem('wedding_session_token');
+    sessionStorage.removeItem('wedding_session_expiry');
     const lockScreen = document.getElementById('lock-screen');
     const pinInput = document.getElementById('pin-input');
     const pinError = document.getElementById('pin-error');
@@ -88,10 +268,11 @@ function logoutAdmin() {
     if (pinError) pinError.innerText = '';
     if (pinInput) pinInput.value = '';
     if (lockScreen) lockScreen.classList.remove('hidden');
+    checkLockoutStatus();
     showToast("Panel admin berhasil dikunci.", "info");
 }
 
-function gantiPinAdmin(event) {
+async function gantiPinAdmin(event) {
     event.preventDefault();
     const pinBaru = document.getElementById('pin-baru').value.trim();
     const pinKonfirmasi = document.getElementById('pin-konfirmasi').value.trim();
@@ -102,12 +283,15 @@ function gantiPinAdmin(event) {
     }
 
     if (pinBaru !== pinKonfirmasi) {
-        showToast("Konfirmasi PIN tidak cocok.", "danger");
+        showToast("Konfirmasi PIN baru tidak cocok.", "danger");
         return;
     }
 
-    WeddingSettings.save({ adminPin: pinBaru }).then(() => {
-        showToast("PIN Admin berhasil diperbarui!", "success");
+    // Enkripsi hash PIN baru sebelum disimpan
+    const newHash = await hashPin(pinBaru);
+
+    WeddingSettings.save({ adminPinHash: newHash }).then(() => {
+        showToast("PIN Admin berhasil diperbarui dengan proteksi kriptografi SHA-256!", "success");
         document.getElementById('pin-baru').value = '';
         document.getElementById('pin-konfirmasi').value = '';
     });

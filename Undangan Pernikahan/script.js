@@ -68,6 +68,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (typeof UcapanDB !== 'undefined') {
         UcapanDB.onUcapanChange(renderDaftarUcapan);
     }
+
+    // 9. Inisialisasi Akses Terselubung (Stealth Admin Access)
+    initStealthAdminTrigger();
 });
 
 // --------------------------------------------------------------------------
@@ -665,4 +668,41 @@ async function kirimUcapan(event) {
             btnKirim.innerHTML = originalBtnText;
         }
     }
+}
+
+// --------------------------------------------------------------------------
+// AKSES TERSELUBUNG ADMIN (STEALTH ADMIN TRIGGER)
+// --------------------------------------------------------------------------
+function initStealthAdminTrigger() {
+    let tapCount = 0;
+    let tapTimer = null;
+
+    const handleSecretTap = function(e) {
+        tapCount++;
+        clearTimeout(tapTimer);
+
+        if (tapCount >= 5) {
+            tapCount = 0;
+            if (navigator.vibrate) navigator.vibrate(80);
+            window.location.href = 'admin.html?portal=secret';
+        } else {
+            tapTimer = setTimeout(function() {
+                tapCount = 0;
+            }, 2000);
+        }
+    };
+
+    // Sentuh / klik 5x pada simbol '&' (di cover, mempelai, atau penutup)
+    document.querySelectorAll('.cover-simbol-dan, .simbol-dan, .simbol-dan-tengah').forEach(function(el) {
+        el.style.cursor = 'default';
+        el.addEventListener('click', handleSecretTap);
+    });
+
+    // Keyboard shortcut tersembunyi untuk laptop/komputer: Ctrl + Shift + A
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+            e.preventDefault();
+            window.location.href = 'admin.html?portal=secret';
+        }
+    });
 }
