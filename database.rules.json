@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "ucapan": {
+      ".read": true,
+      "$ucapan_id": {
+        ".write": true,
+        ".validate": "newData.hasChildren(['nama', 'pesan', 'status']) && newData.child('nama').isString() && newData.child('pesan').isString()"
+      }
+    },
+    "settings": {
+      ".read": true,
+      ".write": true
+    },
+    "tamu": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}
