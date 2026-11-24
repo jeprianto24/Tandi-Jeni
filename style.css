@@ -138,6 +138,18 @@ body {
     transform: translateY(-2px);
 }
 
+.catatan-nama {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #f7f3e9;
+    opacity: 0.85;
+    margin-top: 14px;
+    margin-bottom: 0;
+    line-height: 1.4;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    max-width: 320px;
+}
+
 /* ==========================================
    3. KOTAK UTAMA WEBSITE UNDANGAN
    ========================================== */
