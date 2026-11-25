@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
         panggilan: "Tandi",
         namaLengkap: "Tandipuang, S.T",
         orangTua: "Putra dari Pasangan Bpk. Bamba & Ibu Sarah\n(Ambe' Limbong Karaeng & Indo' Limbong Karaeng)",
-        instagram: "https://instagram.com",
+        instagram: "https://www.instagram.com/tandi_puang?hvrq=MW1xMWl3Ym8wOGUwZA==",
         foto: "assets/pria.jpeg"
     },
     // Mempelai Wanita
