@@ -10,7 +10,7 @@ const DEFAULT_SETTINGS = {
         panggilan: "Tandi",
         namaLengkap: "Tandipuang, S.T",
         orangTua: "Putra dari Pasangan Bpk. Bamba & Ibu Sarah\n(Ambe' Limbong Karaeng & Indo' Limbong Karaeng)",
-        instagram: "https://www.instagram.com/tandi_puang?hvrq=MW1xMWl3Ym8wOGUwZA==",
+        instagram: "https://www.instagram.com/tandi_puang?utm_source=qr&cnvx=cTB6dWEzZzhpc21p",
         foto: "assets/pria.jpeg"
     },
     // Mempelai Wanita
@@ -392,6 +392,9 @@ const TamuDB = {
                         list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                         localStorage.setItem('wedding_guests', JSON.stringify(list));
                         callback(list);
+                    } else {
+                        localStorage.setItem('wedding_guests', JSON.stringify([]));
+                        callback([]);
                     }
                 });
             } catch (e) {
@@ -519,7 +522,7 @@ function generateWhatsAppMessage(tamu, settings = null) {
     // Gunakan link pendek jika ada, atau panggil getGuestLink
     const link = (tamu && tamu.shortUrl) ? tamu.shortUrl : getGuestLink(guestName, tamu, s);
 
-    return `Kepada Yth. Bapak/Ibu/Saudara/i ${guestName},
+    return `Kepada Yth. Bapak/Ibu/Saudara/i,
 
 Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri hari bahagia pernikahan kami:
 
