@@ -937,7 +937,7 @@ function renderTabelTamu() {
                 </td>
                 <td>
                     <div class="action-buttons-cell">
-                        <button class="btn-icon btn-icon-copy" onclick="salinKeClipboard('${escapeHtml(link)}', 'Tautan untuk ${escapeHtml(tamu.nama)} berhasil disalin!')" title="Salin Tautan">
+                        <button class="btn-icon btn-icon-copy" onclick="salinTautanTamu('${tamu.id}')" title="Salin Tautan">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                         <button class="btn-icon btn-icon-shorten" onclick="perpendekTamuSatu('${tamu.id}')" title="Perpendek Tautan Tamu Ini">
@@ -949,7 +949,7 @@ function renderTabelTamu() {
                         <a href="${link}" target="_blank" class="btn-icon btn-icon-view" title="Buka Undangan">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i>
                         </a>
-                        <button class="btn-icon btn-icon-delete" onclick="hapusTamuById('${tamu.id}', '${escapeHtml(tamu.nama)}')" title="Hapus Tamu">
+                        <button class="btn-icon btn-icon-delete" onclick="hapusTamuById('${tamu.id}')" title="Hapus Tamu">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
                     </div>
@@ -1017,7 +1017,16 @@ async function perpendekSemuaLinkTamu() {
     }
 }
 
-async function hapusTamuById(id, nama) {
+function salinTautanTamu(id) {
+    const tamu = currentGuests.find(t => t.id === id);
+    if (!tamu) return;
+    const link = tamu.shortUrl || getGuestLink(tamu.nama, tamu, currentSettings);
+    salinKeClipboard(link, `Tautan untuk ${tamu.nama} berhasil disalin!`);
+}
+
+async function hapusTamuById(id) {
+    const tamu = currentGuests.find(t => t.id === id);
+    const nama = tamu ? tamu.nama : 'tamu ini';
     if (confirm(`Yakin ingin menghapus tamu "${nama}" dari daftar?`)) {
         await TamuDB.hapus(id);
         showToast(`Tamu "${nama}" telah dihapus.`, "info");
